@@ -1,0 +1,8 @@
+Changes
+lib/SNMP/Simple.pm
+Makefile.PL
+MANIFEST			This list of files
+printerstats.pl
+README
+t/basic.t
+META.yml                                Module meta-data (added by MakeMaker)

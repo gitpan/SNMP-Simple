@@ -1,0 +1,8 @@
+--- #YAML:1.0
+#
+# Changes for SNMP::Simple
+#
+- version: 0.01
+  date:    Tue May 25 01:14:57 EDT 2004
+  changes:
+    - initial public release

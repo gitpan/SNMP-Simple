@@ -1,0 +1,87 @@
+NAME
+    SNMP::Simple - shortcuts for when using SNMP
+
+SYNOPSIS
+        use SNMP::Simple;
+
+        $name     = $s->get('sysName'); # same as sysName.0
+        $location = $s->get('sysLocation');
+
+        @array    = $s->get_list('hrPrinterStatus');
+        $arrayref = $s->get_list('hrPrinterStatus');
+
+        @list_of_lists = $s->get_table( qw(
+            prtConsoleOnTime
+            prtConsoleColor
+            prtConsoleDescription
+        ) );
+
+        @list_of_hashes = $s->get_named_table(
+            name   => 'prtInputDescription',
+            media  => 'prtInputMediaName',
+            status => 'prtInputStatus',
+            level  => 'prtInputCurrentLevel',
+            max    => 'prtInputMaxCapacity',
+        );
+
+DESCRIPTION
+  Goal
+    The goal of this module is to provide shortcuts and provide a cleaner
+    interface for doing repetitive information-retrieval tasks with SNMP
+    version 1.
+
+  SNMP Beginners, read me first!
+    Please, please, please do not use this module as a starting point for
+    working with SNMP and Perl. Look elsewhere for starting resources:
+
+    * The SNMP module
+    * The Net-SNMP web site (<http://www.net-snmp.org/>) and tutorial
+    (<http://www.net-snmp.org/tutorial-5/>)
+    * Appendix E of Perl for System Administration
+    (<http://www.amazon.com/exec/obidos/tg/detail/-/1565926099>) by David N.
+    Blank-Edelman
+
+  SNMP Advanced and Intermediate users, read me first!
+    I'll admit this is a complete slaughtering of SNMP, but my goals were
+    precise. If you think SNMP::Simple could be refined in any way, feel
+    free to send me suggestions/fixes/patches.
+
+    I'm trying to provide shortcuts, not abstract. My purpose in providing
+    this is so one can write:
+
+        $data{lights} = $s->get_named_table(
+            status => 'prtConsoleOnTime',
+            color  => 'prtConsoleColor',
+            name   => 'prtConsoleDescription',
+        );
+
+    Instead of the following, give or take a little refining:
+
+        $vars = new SNMP::VarList(
+            ['prtConsoleOnTime'],
+            ['prtConsoleColor'],
+            ['prtConsoleDescription'],
+            );
+        my ($light_status, $light_color, $light_desc) = $s->getnext($vars);
+        die $s->{ErrorStr} if $s->{ErrorStr};
+        while ( !$s->{ErrorStr} and $$vars[0]->tag eq "prtConsoleOnTime" ) {
+            push @{ $data{lights} }, {
+                status => ($light_status ? 0 : 1),
+                color  => &SNMP::mapEnum($$vars[1]->tag, $light_color),
+                description => $light_desc,
+            };
+            ($light_status, $light_color, $light_desc) = $s->getnext($vars);
+        }
+
+TODO
+    Among other things,
+
+    * tests
+    * make it smarter when using SNMPv2 and SNMPv3
+
+AUTHOR
+    Ian Langworth <langworth.com>
+
+SEE ALSO
+    SNMP
+
