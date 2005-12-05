@@ -1,8 +1,8 @@
-#!/arch/unix/bin/perl
+#!/usr/bin/env perl
 use strict;
 use warnings;
 
-use constant PRINTERS => qw( printer1 printer2 etc );
+my @PRINTERS = qw( printer1 printer2 etc );
 
 use SNMP::Simple;
 
@@ -21,12 +21,12 @@ use Template;
 $ENV{MIBS} = 'Printer-MIB';
 
 my @printer_data = ();
-foreach my $host (PRINTERS) {
+foreach my $host (@PRINTERS) {
     print STDERR "- querying $host...\n";
 
     my %data = ();
 
-    unless ( Net::Ping->new->ping($host,1) ) {
+    unless ( Net::Ping->new->ping( $host, 1 ) ) {
         warn "Couldn't ping $host\n";
         next;
     }
@@ -35,13 +35,13 @@ foreach my $host (PRINTERS) {
         DestHost  => $host,
         Community => 'public',
         Version   => 1,
-        );
+    );
     warn "No session for $host" && next unless $s;
 
     $data{name}     = $s->get('sysName');
     $data{location} = $s->get('sysLocation');
     $data{status}   = [ $s->get_list('hrPrinterStatus') ]->[0];
-    $data{model}    = [ $s->get_list('hrDeviceDescr')    ]->[0];
+    $data{model}    = [ $s->get_list('hrDeviceDescr') ]->[0];
 
     $data{messages} = $s->get_list('prtConsoleDisplayBufferText');
 
@@ -49,14 +49,14 @@ foreach my $host (PRINTERS) {
         status => 'prtConsoleOnTime',
         color  => 'prtConsoleColor',
         name   => 'prtConsoleDescription',
-        );
+    );
     $data{trays} = $s->get_named_table(
         name   => 'prtInputDescription',
         media  => 'prtInputMediaName',
         status => 'prtInputStatus',
         level  => 'prtInputCurrentLevel',
         max    => 'prtInputMaxCapacity',
-        );
+    );
     $data{supplies} = $s->get_named_table(
         name        => 'prtMarkerSuppliesMarkerIndex',
         type        => 'prtMarkerSuppliesType',
@@ -64,7 +64,7 @@ foreach my $host (PRINTERS) {
         level       => 'prtMarkerSuppliesLevel',
         max         => 'prtMarkerSuppliesMaxCapacity',
         units       => 'prtMarkerSuppliesSupplyUnit',
-        );
+    );
 
     push @printer_data, \%data;
 }
@@ -76,7 +76,7 @@ __DATA__
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta http-equiv="refresh" content="1800; url=printers.html"/>
+    <meta http-equiv="refresh" content="60; url=http://me/printers.html"/>
     <title>CCIS Printers</title>
     <style type="text/css">
         .okay {
